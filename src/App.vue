@@ -1,15 +1,17 @@
 <template>
-<div class="flex flex-col h-screen overflow-hidden">
-    <Header/>
-    <Main/>
-    <Footer/>
+  <div class="flex flex-col h-screen overflow-hidden">
+    <Header />
+    <div class="h-full w-full mx-auto">
+      <Main />
     </div>
+    <Footer />
+  </div>
 </template>
 
 <script>
-import Header from './components/Header.vue';
-import Main from './components/Main.vue';
-import Footer from './components/Footer.vue';
+import Header from "./components/Header.vue";
+import Main from "./components/Main.vue";
+import Footer from "./components/Footer.vue";
 
 export default {
   components: {
@@ -20,6 +22,4 @@ export default {
 };
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>
