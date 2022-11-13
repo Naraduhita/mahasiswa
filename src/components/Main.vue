@@ -26,7 +26,7 @@
           </button>
           <button
             class="bg-purple4 mr-3 hover:bg-purple2 text-white font-bold py-2 px-4 rounded"
-            @click="penjumlahan(item.id)"
+            @click="penjumlahan(item.idDoc, item.jumlah)"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -44,7 +44,7 @@
           <!--Kurang-->
           <button
             class="bg-purple5 mr-3 hover:bg-purple2 text-white font-bold py-2 px-4 rounded"
-            @click="pengurangan(item.id)"
+            @click="pengurangan(item.idDoc, item.jumlah)"
             :disabled="item.jumlah === 0"
           >
             <svg
@@ -63,7 +63,7 @@
           <!-- Hapus -->
           <button
             class="bg-red-500 hover:bg-purple2 text-white font-bold py-2 px-4 rounded"
-            @click="hapus(item.id)"
+            @click="hapus(item.idDoc)"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -90,7 +90,15 @@
 
 <script>
 import { database } from "../firebase/config";
-import { collection, getDocs, addDoc, onSnapshot } from "firebase/firestore";
+import {
+  collection,
+  getDocs,
+  doc,
+  deleteDoc,
+  addDoc,
+  onSnapshot,
+  updateDoc,
+} from "firebase/firestore";
 
 export default {
   name: "Shopping",
@@ -101,21 +109,25 @@ export default {
     total: 0,
   }),
 
-  async mounted() {
+  mounted() {
     // const querySnapshot = await getDocs(collection(database, "items"));
     // querySnapshot.forEach((doc) => {
     //   this.arrayShopping.push({ id: doc.data().id, jumlah: doc.data().jumlah });
     // });
-    const temp = []
+
     onSnapshot(collection(database, "items"), (querySnapshot) => {
+      const temp = [];
+      let total_temp = 0;
       querySnapshot.forEach((doc) => {
+        total_temp = total_temp + doc.data().jumlah;
         temp.push({
+          idDoc: doc.id,
           id: doc.data().id,
           jumlah: doc.data().jumlah,
         });
       });
-    this.arrayShopping = temp
-
+      this.arrayShopping = temp;
+      this.total = total_temp;
     });
   },
   // https://www.youtube.com/watch?v=84mhLKUM04E&ab_channel=MakeAppswithDanny
@@ -129,33 +141,38 @@ export default {
           id: randomCode,
           jumlah: 0,
         });
-        console.log("Success with ID: ", docRef.id);
       } catch (e) {
         console.error("Error adding document: ", e);
       }
     },
-    penjumlahan(id) {
-      const index = this.arrayShopping.findIndex((item) => {
-        return id === item.id;
+    async penjumlahan(idDoc, jumlahNow) {
+      // const index = this.arrayShopping.findIndex((item) => {
+      //   return id === item.id;
+      // });
+      // this.arrayShopping[index].jumlah = this.arrayShopping[index].jumlah + 1;
+      // this.total = this.total + 1;
+      await updateDoc(doc(database, "items", idDoc), {
+        jumlah: jumlahNow + 1,
       });
-      this.arrayShopping[index].jumlah = this.arrayShopping[index].jumlah + 1;
-      this.total = this.total + 1;
     },
-    pengurangan(id) {
-      const index = this.arrayShopping.findIndex((item) => {
-        return id === item.id;
+    async pengurangan(idDoc, jumlahNow) {
+      // const index = this.arrayShopping.findIndex((item) => {
+      //   return id === item.id;
+      // });
+      // this.arrayShopping[index].jumlah = this.arrayShopping[index].jumlah - 1;
+      // this.total = this.total - 1;
+      await updateDoc(doc(database, "items", idDoc), {
+        jumlah: jumlahNow - 1,
       });
-      this.arrayShopping[index].jumlah = this.arrayShopping[index].jumlah - 1;
-      this.total = this.total - 1;
     },
-    hapus(id) {
-      const index = this.arrayShopping.findIndex((item) => {
-        return id === item.id;
-      });
-      this.total = this.total - this.arrayShopping[index].jumlah;
-      const arrayDeleted = this.arrayShopping.filter((item) => item.id !== id);
-      this.arrayShopping = arrayDeleted;
-      // console.log(this.arrayShopping)
+    async hapus(idDoc) {
+      // const index = this.arrayShopping.findIndex((item) => {
+      //   return id === item.id;
+      // });
+      // this.total = this.total - this.arrayShopping[index].jumlah;
+      // const arrayDeleted = this.arrayShopping.filter((item) => item.id !== id);
+      // this.arrayShopping = arrayDeleted;
+      await deleteDoc(doc(collection(database, "items"), idDoc));
     },
   },
 };
